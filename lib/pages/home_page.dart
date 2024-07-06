@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:wechat/components/text_field.dart';
+import 'package:wechat/components/wall_post.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +18,17 @@ class _HomePageState extends State<HomePage> {
     FirebaseAuth.instance.signOut();
   }
 
-  void postMessage() {}
+//post message
+  void postMessage() {
+    if (textController.text.isNotEmpty) {
+      FirebaseFirestore.instance.collection("User Posts").add({
+        'UserEmail': currentUser.email,
+        'Message': textController.text,
+        'Timestamp': Timestamp.now(),
+      });
+      textController.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +52,34 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: Column(
           children: [
+            //the wall
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('User Posts')
+                    .orderBy('Timestamp')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final post = snapshot.data!.docs[index];
+                          return WallPost(
+                              message: post['Message'],
+                              user: post['UserEmail']);
+                        });
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error :${snapshot.error}'),
+                    );
+                  }
+                  return const Center(
+                      child: CircularProgressIndicator.adaptive());
+                },
+              ),
+            ),
+            //post message
             Padding(
               padding: const EdgeInsets.all(25.0),
               child: Row(
