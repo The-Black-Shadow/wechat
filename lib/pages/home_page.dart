@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
         'UserEmail': currentUser.email,
         'Message': textController.text,
         'Timestamp': Timestamp.now(),
+        'Likes': [],
       });
       textController.clear();
     }
@@ -66,8 +67,11 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index) {
                           final post = snapshot.data!.docs[index];
                           return WallPost(
-                              message: post['Message'],
-                              user: post['UserEmail']);
+                            message: post['Message'],
+                            user: post['UserEmail'],
+                            postId: post.id,
+                            likes: List<String>.from(post['Likes'] ?? []),
+                          );
                         });
                   } else if (snapshot.hasError) {
                     return Center(

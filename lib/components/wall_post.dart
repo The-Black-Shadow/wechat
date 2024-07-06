@@ -1,14 +1,56 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class WallPost extends StatelessWidget {
+import 'package:wechat/components/like_button.dart';
+
+class WallPost extends StatefulWidget {
   final String message;
   final String user;
+  final String postId;
+  final List<String> likes;
   const WallPost({
     super.key,
     required this.message,
     required this.user,
+    required this.postId,
+    required this.likes,
   });
+
+  @override
+  State<WallPost> createState() => _WallPostState();
+}
+
+class _WallPostState extends State<WallPost> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  bool isLiked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isLiked = widget.likes.contains(currentUser.email);
+  }
+
+  void toggleLike() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+
+    //access from firebase
+    DocumentReference postRef =
+        FirebaseFirestore.instance.collection('User Posts').doc(widget.postId);
+
+    if (isLiked) {
+      postRef.update({
+        'Likes': FieldValue.arrayUnion([currentUser.email]),
+      });
+    } else if (!isLiked) {
+      postRef.update({
+        'Likes': FieldValue.arrayRemove([currentUser.email]),
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,23 +64,23 @@ class WallPost extends StatelessWidget {
       child: Row(
         children: [
           //profile pic
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey[300],
-            ),
-            child: const Icon(Icons.person),
+          Column(
+            children: [
+              //like button
+              LikeButton(isLiked: isLiked, onTap: toggleLike),
+              //like count
+              Text(widget.likes.length.toString()),
+            ],
           ),
           const SizedBox(width: 10),
           //message
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(message),
+              Text(widget.message),
               const SizedBox(height: 10),
               Text(
-                user,
+                widget.user,
                 style: TextStyle(color: Colors.grey[400]),
               ),
             ],
