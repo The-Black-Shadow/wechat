@@ -99,7 +99,11 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            Text('Logged in as ${currentUser.email!}'),
+            Text(
+              'Logged in as ${currentUser.email!}',
+              style: TextStyle(color: Colors.grey[800]),
+            ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
