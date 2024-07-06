@@ -21,6 +21,17 @@ class WallPost extends StatelessWidget {
       margin: const EdgeInsets.only(top: 25, left: 25, right: 25),
       child: Row(
         children: [
+          //profile pic
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey[300],
+            ),
+            child: const Icon(Icons.person),
+          ),
+          const SizedBox(width: 10),
+          //message
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
